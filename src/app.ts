@@ -1,5 +1,5 @@
 import express from 'express';
-import { env } from '@/src/environment-config';
+import { env } from './environment-config';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { Pool } from 'pg';
@@ -21,23 +21,23 @@ app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', true);
 app.use(cookieParser(env.COOKIE_SECRET));
 
-//TODO logger
-
-// routes
-
-//Connect to server and start server
-const serverListeningMessage =
-	env.NODE_ENV === 'production'
-		? `http server is running on internal port ${env.PORT} behind a reverse proxy
-		Public URL: ${env.DATABASE_URL}`
-		: `http sercver running on port ${env.PORT}. URL: ${env.DATABASE_URL}`;
-
+// create
 const pool = new Pool({
 	connectionString: env.DATABASE_URL,
 	ssl: {
 		rejectUnauthorized: false,
 	},
 });
+
+//TODO logger
+
+// routes
+
+const serverListeningMessage =
+	env.NODE_ENV === 'production'
+		? `http server is running on internal port ${env.PORT} behind a reverse proxy
+		Public URL: ${env.DATABASE_URL}`
+		: `http sercver running on port ${env.PORT}. URL: ${env.DATABASE_URL}`;
 
 // start lsitening
 app.listen(env.PORT, () => console.log(serverListeningMessage));
