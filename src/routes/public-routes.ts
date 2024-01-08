@@ -17,7 +17,7 @@ router.get('/', (request, response) => {
 router.post('/signup', async (request, response, next) => {
 	try {
 		const {
-			body: { email, password },
+			body: { username, email, password },
 		} = request;
 
 		const hashedPassword = await safe({
@@ -29,8 +29,8 @@ router.post('/signup', async (request, response, next) => {
 
 		const userId = await safe({
 			value: await pool.query(
-				'INSERT INTO protected.users (email, password) VALUES ($1, $2) RETURNING user_id',
-				[email, hashedPassword],
+				'INSERT INTO protected.users (username, email, password) VALUES ($1, $2, $3) RETURNING user_id',
+				[username, email, hashedPassword],
 			),
 			async: true,
 			errorHandler: (error) => {
