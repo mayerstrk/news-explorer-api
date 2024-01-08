@@ -2,7 +2,11 @@ import express from 'express';
 import { env } from './environment-config';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { Pool } from 'pg';
+import validateTokenMiddleware from './middleware/validate-token';
+import errorHandlerMiddleware from './middleware/error-handler-middleware';
+import { errors as celebrateValidator } from 'celebrate';
+import { requestLogger, errorLogger } from './middleware/logger-middleware';
+import publicRoutes from './routes/public-routes';
 
 const app = express();
 
@@ -21,23 +25,27 @@ app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', true);
 app.use(cookieParser(env.COOKIE_SECRET));
 
-// create
-const pool = new Pool({
-	connectionString: env.DATABASE_URL,
-	ssl: {
-		rejectUnauthorized: false,
-	},
-});
+// request logger
+app.use('/', requestLogger);
 
-//TODO logger
+// route
+app.use('/', publicRoutes);
 
-// routes
+// app.use('/', validateTokenMiddleware);
+
+// app.use('/', protectedRoutes);
+
+// app.use('/', errorLogger);
+
+// app.use('/', celebrateValidator());
+
+app.use('/', errorHandlerMiddleware);
 
 const serverListeningMessage =
 	env.NODE_ENV === 'production'
 		? `http server is running on internal port ${env.PORT} behind a reverse proxy
-		Public URL: ${env.DATABASE_URL}`
-		: `http sercver running on port ${env.PORT}. URL: ${env.DATABASE_URL}`;
+		Public URL:${env.DATABASE_URL}`
+		: `http server running on port ${env.PORT}. URL: ${env.DATABASE_URL}`;
 
 // start lsitening
 app.listen(env.PORT, () => console.log(serverListeningMessage));
