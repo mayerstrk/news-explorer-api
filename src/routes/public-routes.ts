@@ -10,6 +10,10 @@ import { Status } from '../utils/enums/status';
 
 const router = Router();
 
+router.get('/', (request, response) => {
+	response.send('Hello World');
+});
+
 router.post('/signup', async (request, response, next) => {
 	try {
 		const {
