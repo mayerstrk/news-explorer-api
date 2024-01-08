@@ -45,7 +45,7 @@ const serverListeningMessage =
 	env.NODE_ENV === 'production'
 		? `http server is running on internal port ${env.PORT} behind a reverse proxy
 		Public URL:${env.DATABASE_URL}`
-		: `http server running on port ${env.PORT}. URL: ${env.DATABASE_URL}`;
+		: `http server running on port ${env.PORT}. URL: ${env.API_URL}`;
 
 // start lsitening
 app.listen(env.PORT, () => console.log(serverListeningMessage));
