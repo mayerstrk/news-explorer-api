@@ -1,5 +1,11 @@
+import { Request } from 'express';
+
 interface RequestUser {
-	_id: string;
+	_id: number;
 }
 
-export type { RequestUser };
+interface AppRequest extends Request {
+	user?: RequestUser;
+}
+
+export type { RequestUser, AppRequest };

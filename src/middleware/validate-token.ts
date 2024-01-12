@@ -7,7 +7,7 @@ import { isRequestUser } from '../utils/helpers/is-request-user';
 import { env } from '../environment-config';
 
 const validateTokenMiddleware: RequestHandler = async (
-	request,
+	request: Request,
 	_response,
 	next,
 ) => {
@@ -25,7 +25,7 @@ const validateTokenMiddleware: RequestHandler = async (
 			typeguard: isRequestUser,
 		});
 
-		(request as Request & { user: { _id: string } }).user = decoded;
+		request.user = decoded;
 		next();
 	} catch (error) {
 		next(error);
