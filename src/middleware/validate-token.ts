@@ -1,15 +1,17 @@
-import { type Request, type RequestHandler } from 'express';
+import { type Response, type NextFunction } from 'express';
+import { type AppRequest } from '../types/request';
 import jwt from 'jsonwebtoken';
 import { ErrorName } from '../utils/enums/error-names';
 import safe from '../utils/helpers/safe';
 import { isRequestUser } from '../utils/helpers/is-request-user';
 // eslint-disable-next-line unicorn/prevent-abbreviations
 import { env } from '../environment-config';
+import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
 
-const validateTokenMiddleware: RequestHandler = async (
-	request: Request,
-	_response,
-	next,
+const validateTokenMiddleware = async (
+	request: AppRequest,
+	_response: Response,
+	next: NextFunction,
 ) => {
 	try {
 		const token = await safe({
@@ -18,12 +20,12 @@ const validateTokenMiddleware: RequestHandler = async (
 			errorName: ErrorName.authentication,
 		});
 
-		const decoded = await safe({
-			value: jwt.verify(token, env.JWT_SECRET),
-			errorMessage: 'Invalid token format.',
-			errorName: ErrorName.authentication,
-			typeguard: isRequestUser,
-		});
+		const decoded = assertWithTypeguard(
+			jwt.verify(token, env.JWT_SECRET),
+			isRequestUser,
+			'Invalid token format.',
+			ErrorName.authentication,
+		);
 
 		request.user = decoded;
 		next();
