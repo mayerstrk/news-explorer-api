@@ -39,7 +39,7 @@ const createArticleControllerHelper = async (
 
 	const {
 		rows: [article],
-	} = await safe({
+	} = await safe<QueryResult<Article>>({
 		value: pool.query(
 			'INSERT INTO protected.articles (keyword, title, content, date, source, link, image, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
 			[keyword, title, content, date, source, link, image, userId],
@@ -51,7 +51,7 @@ const createArticleControllerHelper = async (
 	return {
 		request,
 		response,
-		data: article as Article,
+		data: article,
 	};
 };
 
@@ -59,11 +59,34 @@ const createArticleController = controllerBuilder(
 	createArticleControllerHelper,
 );
 
+// === Get all articles ===
+
+const getAllArticlesControllerHelper = async (
+	request: AppRequest,
+	response: Response,
+) => {
+	const { rows: articles } = await safe<QueryResult<Article>>({
+		value: pool.query('SELECT * FROM protected.articles'),
+		errorMessage: 'Error getting articles',
+		errorName: ErrorName.internalServerError,
+	});
+
+	return {
+		request,
+		response,
+		data: articles,
+	};
+};
+
+const getAllArticlesController = controllerBuilder(
+	getAllArticlesControllerHelper,
+);
+
 // === Get current user articles ===
 
-const getCurrentUserArticlesControllerHelper: ControllerHelper = async (
-	request,
-	response,
+const getCurrentUserSavedArticlesControllerHelper = async (
+	request: AppRequest,
+	response: Response,
 ) => {
 	const userId = await safe({
 		value: request.user,
@@ -71,7 +94,7 @@ const getCurrentUserArticlesControllerHelper: ControllerHelper = async (
 		errorName: ErrorName.internalServerError,
 	});
 
-	const { rows } = await safe<QueryResult<Article>>({
+	const { rows: articles } = await safe<QueryResult<Article>>({
 		value: pool.query(
 			`
 			SELECT a.* FROM articles a
@@ -87,12 +110,12 @@ const getCurrentUserArticlesControllerHelper: ControllerHelper = async (
 	return {
 		request,
 		response,
-		data: rows as Article[],
+		data: articles,
 	};
 };
 
-const gerCurrentUserArticlesController = controllerBuilder(
-	getCurrentUserArticlesControllerHelper,
+const getCurrentUserSavedArticlesController = controllerBuilder(
+	getCurrentUserSavedArticlesControllerHelper,
 );
 
 // == Save article ==
@@ -119,7 +142,7 @@ const saveArticleControllerHelper = async (
 
 	const {
 		rows: [article],
-	} = await safe({
+	} = await safe<QueryResult<Article>>({
 		value: pool.query(
 			'SELECT * FROM protected.articles WHERE article_id = $1',
 			[articleId],
@@ -131,7 +154,7 @@ const saveArticleControllerHelper = async (
 	return {
 		request,
 		response,
-		data: article as Article,
+		data: article,
 	};
 };
 
@@ -161,7 +184,7 @@ const unsaveArticleControllerHelper = async (
 
 	const {
 		rows: [article],
-	} = await safe({
+	} = await safe<QueryResult<Article>>({
 		value: pool.query(
 			'SELECT * FROM protected.articles WHERE article_id = $1',
 			[articleId],
@@ -173,7 +196,7 @@ const unsaveArticleControllerHelper = async (
 	return {
 		request,
 		response,
-		data: article as Article,
+		data: article,
 	};
 };
 
@@ -183,22 +206,25 @@ const unsaveArticleController = controllerBuilder(
 
 export {
 	createArticleController,
-	gerCurrentUserArticlesController,
+	getAllArticlesController,
+	getCurrentUserSavedArticlesController,
 	saveArticleController,
 	unsaveArticleController,
 };
 
 export type ArticleController =
 	| typeof createArticleController
-	| typeof gerCurrentUserArticlesController
+	| typeof getCurrentUserSavedArticlesController
 	| typeof saveArticleController
-	| typeof unsaveArticleController;
+	| typeof unsaveArticleController
+	| typeof getAllArticlesController;
 
 export type ArticleControllerHelper =
 	| typeof createArticleControllerHelper
-	| typeof getCurrentUserArticlesControllerHelper
+	| typeof getCurrentUserSavedArticlesControllerHelper
 	| typeof saveArticleControllerHelper
-	| typeof unsaveArticleControllerHelper;
+	| typeof unsaveArticleControllerHelper
+	| typeof getAllArticlesControllerHelper;
 
 export type ArticleQueryResponse =
 	ControllerHelperResponseData<ArticleControllerHelper>;

@@ -39,3 +39,4 @@ const validateTokenMiddleware = (request, _response, next) => __awaiter(void 0, 
     }
 });
 exports.default = validateTokenMiddleware;
+//# sourceMappingURL=validate-token.js.map

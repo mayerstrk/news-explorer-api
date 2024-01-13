@@ -5,12 +5,20 @@ import safe from '../utils/helpers/safe';
 import { type ControllerHelperResponseData } from '../types/utility-types';
 import { ErrorName } from '../utils/enums/error-names';
 import { env } from '../environment-config';
-import { type DatabaseError } from 'pg';
-import controllerBuilder, {
-	ControllerHelper,
-} from '../builders/controller-builder';
+import { QueryResult, type DatabaseError } from 'pg';
+import controllerBuilder from '../builders/controller-builder';
 import { AppRequest } from '../types/request';
 import { type Response } from 'express';
+import assert from '../utils/helpers/assert';
+
+interface User {
+	user_id: number;
+	email: string;
+	username: string;
+	password: string;
+	created_at: Date;
+	updated_at: Date;
+}
 
 // === Create User ===
 
@@ -31,7 +39,7 @@ const createUserControllerHelper = async (
 
 	const {
 		rows: [{ user_id: userId }],
-	} = await safe({
+	} = await safe<QueryResult<User>>({
 		value: pool.query(
 			'INSERT INTO protected.users (username, email, password) VALUES ($1, $2, $3) RETURNING user_id',
 			[username, email, hashedPassword],
@@ -88,7 +96,7 @@ const signInControllerHelper = async (
 
 	const {
 		rows: [{ user_id: userId, password: hashedPassword }],
-	} = await safe({
+	} = await safe<QueryResult<User>>({
 		value: pool.query(
 			'SELECT user_id, password FROM protected.users WHERE email = ($1)',
 			[email],
@@ -149,15 +157,15 @@ const getCurrentUserControllerHelper = async (
 	request: AppRequest,
 	response: Response,
 ) => {
-	const userId = safe({
-		value: request.user?._id,
-		errorMessage: 'No user attatched to request',
-		errorName: ErrorName.internalServerError,
-	});
+	const { _id: userId } = assert(
+		request.user,
+		'No user field foun in request object',
+		ErrorName.internalServerError,
+	);
 
 	const {
 		rows: [{ username, email }],
-	} = await safe({
+	} = await safe<QueryResult<User>>({
 		value: pool.query('SELECT username, email FROM users WHERE user_id = $1', [
 			userId,
 		]),

@@ -9,3 +9,4 @@ const pool = new pg_1.Pool({
     },
 });
 exports.default = pool;
+//# sourceMappingURL=db.js.map

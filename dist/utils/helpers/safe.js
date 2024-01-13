@@ -16,22 +16,17 @@ const error_classes_1 = require("../classes/error-classes");
 const get_error_constructor_1 = __importDefault(require("./get-error-constructor"));
 function safe(configuration) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { value, async = false, errorMessage, errorName, errorHandler, test, testErrorMessage, testErrorName, typeguard, } = configuration;
+        const { value, errorMessage, errorName, errorHandler, test, testErrorMessage, testErrorName, typeguard, } = configuration;
         let resolvedValue;
-        if (async) {
-            try {
-                resolvedValue = yield value;
-            }
-            catch (error) {
-                if (errorHandler) {
-                    const { errorName, errorMessage } = errorHandler(error);
-                    throw new ((0, get_error_constructor_1.default)(errorName))(errorMessage, error);
-                }
+        try {
+            resolvedValue = yield value;
+        }
+        catch (error) {
+            if (errorHandler) {
+                const { errorName, errorMessage } = errorHandler(error);
                 throw new ((0, get_error_constructor_1.default)(errorName))(errorMessage, error);
             }
-        }
-        else {
-            resolvedValue = value;
+            throw new ((0, get_error_constructor_1.default)(errorName))(errorMessage, error);
         }
         if (resolvedValue === null || resolvedValue === undefined) {
             throw new error_classes_1.CastError(`${errorMessage} - Value is null or undefined`);
@@ -57,3 +52,4 @@ function safe(configuration) {
     });
 }
 exports.default = safe;
+//# sourceMappingURL=safe.js.map

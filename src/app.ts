@@ -7,6 +7,7 @@ import errorHandlerMiddleware from './middleware/error-handler-middleware';
 import { errors as celebrateValidator } from 'celebrate';
 import { requestLogger, errorLogger } from './middleware/logger-middleware';
 import publicRoutes from './routes/public-routes';
+import protectedRoutes from './routes/protected-routes';
 
 const app = express();
 
@@ -28,16 +29,16 @@ app.use(cookieParser(env.COOKIE_SECRET));
 // request logger
 app.use('/', requestLogger);
 
-// route
+// routes
 app.use('/', publicRoutes);
 
-// app.use('/', validateTokenMiddleware);
+app.use('/', validateTokenMiddleware);
 
-// app.use('/', protectedRoutes);
+app.use('/', protectedRoutes);
 
-// app.use('/', errorLogger);
+app.use('/', errorLogger);
 
-// app.use('/', celebrateValidator());
+app.use('/', celebrateValidator());
 
 app.use('/', errorHandlerMiddleware);
 
@@ -45,7 +46,7 @@ const serverListeningMessage =
 	env.NODE_ENV === 'production'
 		? `http server is running on internal port ${env.PORT} behind a reverse proxy
 		Public URL:${env.DATABASE_URL}`
-		: `http server running on port ${env.PORT}. URL: ${env.API_URL}`;
+		: `http server running on port ${env.PORT}. URL: http://${env.APP_DOMAIN}:${env.PORT}`;
 
 // start lsitening
 app.listen(env.PORT, () => console.log(serverListeningMessage));

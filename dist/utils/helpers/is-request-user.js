@@ -10,3 +10,4 @@ function isRequestUser(value) {
         typeof value._id === 'string');
 }
 exports.isRequestUser = isRequestUser;
+//# sourceMappingURL=is-request-user.js.map

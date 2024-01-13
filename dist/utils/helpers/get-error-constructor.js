@@ -42,3 +42,4 @@ function getErrorConstructor(errorName) {
     }
 }
 exports.default = getErrorConstructor;
+//# sourceMappingURL=get-error-constructor.js.map
