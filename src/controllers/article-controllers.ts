@@ -88,7 +88,7 @@ const getCurrentUserSavedArticlesControllerHelper = async (
 	request: AppRequest,
 	response: Response,
 ) => {
-	const userId = await safe({
+	const { _id: userId } = await safe({
 		value: request.user,
 		errorMessage: 'No user arratched to request',
 		errorName: ErrorName.internalServerError,
@@ -99,7 +99,7 @@ const getCurrentUserSavedArticlesControllerHelper = async (
 			`
 			SELECT a.* FROM articles a
 			JOIN user_saved_articles usa ON a.article_id = usa.article_id
-			WHERE uas.user_id = $1
+			WHERE usa.user_id = $1
 		`,
 			[userId],
 		),
