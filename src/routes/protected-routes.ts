@@ -16,6 +16,6 @@ router.post('/articles', createArticleController);
 
 router.get('/users/me/articles', getCurrentUserSavedArticlesController);
 router.post('/users/me/articles/:articleId', saveArticleController);
-router.delete('users/me/articles/:articleId', unsaveArticleController);
+router.delete('/users/me/articles/:articleId', unsaveArticleController);
 
 export default router;
