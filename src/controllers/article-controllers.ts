@@ -14,7 +14,7 @@ interface Article {
 	article_id: number;
 	keyword: string;
 	title: string;
-	content: string;
+	text: string;
 	date: Date;
 	source: string;
 	link: string;
@@ -30,7 +30,7 @@ const createArticleControllerHelper = async (
 	request: AppRequest,
 	response: Response,
 ) => {
-	const { keyword, title, content, date, source, link, image } = request.body;
+	const { keyword, title, text, date, source, link, image } = request.body;
 	const { _id: userId } = assert(
 		request.user,
 		'No user property found in request object',
@@ -42,7 +42,7 @@ const createArticleControllerHelper = async (
 	} = await safe<QueryResult<Article>>({
 		value: pool.query(
 			'INSERT INTO protected.articles (keyword, title, content, date, source, link, image, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-			[keyword, title, content, date, source, link, image, userId],
+			[keyword, title, text, date, source, link, image, userId],
 		),
 		errorMessage: 'Error creating article',
 		errorName: ErrorName.internalServerError,
