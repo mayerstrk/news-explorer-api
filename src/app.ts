@@ -11,7 +11,7 @@ import protectedRoutes from './routes/protected-routes';
 
 const app = express();
 
-// Configure express server and set up middleware
+// Configure express server and set up middleware.
 app.use(
 	cors({
 		origin: [env.APP_URL],
