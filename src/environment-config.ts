@@ -8,6 +8,7 @@ const enum EnvironmentVariables {
 	NODE_ENV = 'NODE_ENV',
 	APP_DOMAIN = 'APP_DOMAIN',
 	APP_URL = 'APP_URL',
+	API_DOMAIN = 'API_DOMAIN',
 	API_URL = 'API_URL',
 	DATABASE_URL = 'DATABASE_URL',
 	COOKIE_SECRET = 'COOKIE_SECRET',
@@ -37,11 +38,15 @@ const environmentVariables = {
 	),
 	[EnvironmentVariables.APP_URL]: getEnvVariable(
 		EnvironmentVariables.APP_URL,
-		'http://127.0.0.1:3000',
+		'http://127.0.0.1:5173',
+	),
+	[EnvironmentVariables.API_DOMAIN]: getEnvVariable(
+		EnvironmentVariables.API_DOMAIN,
+		'127.0.0.1:3000',
 	),
 	[EnvironmentVariables.API_URL]: getEnvVariable(
 		EnvironmentVariables.API_URL,
-		'http://127.0.0.1:5001',
+		'http://127.0.0.1:3000',
 	),
 	[EnvironmentVariables.DATABASE_URL]: getEnvVariable(
 		EnvironmentVariables.DATABASE_URL,

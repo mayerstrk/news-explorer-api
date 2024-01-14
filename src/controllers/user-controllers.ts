@@ -70,7 +70,7 @@ const createUserControllerHelper = async (
 	response.cookie('token', token, {
 		httpOnly: true,
 		secure: true,
-		domain: env.APP_DOMAIN,
+		domain: env.API_DOMAIN,
 		sameSite: 'strict',
 		signed: true,
 	});
@@ -120,7 +120,7 @@ const signInControllerHelper = async (
 	response.cookie('token', token, {
 		httpOnly: true,
 		secure: true,
-		domain: env.APP_DOMAIN,
+		domain: env.API_DOMAIN,
 		sameSite: 'strict',
 		signed: true,
 	});
