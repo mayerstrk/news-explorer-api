@@ -111,7 +111,11 @@ async function safe<V, R extends V>(configuration: SafeConfig<V, R>) {
 		throw new (getErrorConstructor(errorName))(errorMessage, error as Error);
 	}
 
-	if (resolvedValue === null || resolvedValue === undefined) {
+	if (
+		resolvedValue === null ||
+		resolvedValue === undefined ||
+		resolvedValue === false
+	) {
 		throw new CastError(`${errorMessage} - Value is null or undefined`);
 	}
 

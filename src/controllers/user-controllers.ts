@@ -10,11 +10,16 @@ import controllerBuilder from '../builders/controller-builder';
 import { AppRequest } from '../types/request';
 import { type Response } from 'express';
 import assert from '../utils/helpers/assert';
-
+import type {
+	CreateUserRequest,
+	EmptyRequest,
+	SigninRequest,
+} from '../types/app-requests';
+import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
 interface User {
 	user_id: number;
 	email: string;
-	username: string;
+	name: string;
 	password: string;
 	created_at: Date;
 	updated_at: Date;
@@ -23,11 +28,11 @@ interface User {
 // === Create User ===
 
 const createUserControllerHelper = async (
-	request: AppRequest,
+	request: AppRequest<CreateUserRequest>,
 	response: Response,
 ) => {
 	const {
-		body: { username, email, password },
+		body: { name, email, password },
 	} = request;
 
 	const hashedPassword = await safe({
@@ -35,14 +40,13 @@ const createUserControllerHelper = async (
 		errorMessage: 'Error hashing password',
 		errorName: ErrorName.internalServerError,
 	});
-	console.log('				1');
 
 	const {
 		rows: [{ user_id: userId }],
 	} = await safe<QueryResult<User>>({
 		value: pool.query(
-			'INSERT INTO protected.users (username, email, password) VALUES ($1, $2, $3) RETURNING user_id',
-			[username, email, hashedPassword],
+			'INSERT INTO protected.users (name, email, password) VALUES ($1, $2, $3) RETURNING user_id',
+			[name, email, hashedPassword],
 		),
 		errorHandler: (error) => {
 			if ((error as DatabaseError).code === '23505') {
@@ -87,29 +91,46 @@ const createUserController = controllerBuilder(createUserControllerHelper);
 // === Sign in ===
 
 const signInControllerHelper = async (
-	request: AppRequest,
+	request: AppRequest<SigninRequest>,
 	response: Response,
 ) => {
 	const {
 		body: { email, password },
 	} = request;
 
-	const {
-		rows: [{ user_id: userId, password: hashedPassword }],
-	} = await safe<QueryResult<User>>({
-		value: pool.query(
-			'SELECT user_id, password FROM protected.users WHERE email = ($1)',
-			[email],
-		),
-		errorMessage: 'Invalid email or password',
-		errorName: ErrorName.authentication,
-	});
+	// const { rows } = await safe<QueryResult<User>>({
+	// 	value: pool.query(
+	// 		'SELECT user_id, password FROM protected.users WHERE email = ($1)',
+	// 		[email],
+	// 	),
+	// 	errorMessage: 'Invalid email or password',
+	// 	errorName: ErrorName.authentication,
+	// });
 
-	await safe({
-		value: bcrypt.compare(password, hashedPassword),
-		errorMessage: 'Invalid email or password',
-		errorName: ErrorName.authentication,
-	});
+	const queryResult: QueryResult<User> = await pool.query(
+		'SELECT user_id, password FROM protected.users WHERE email = $1',
+		[email],
+	);
+
+	const { user_id: userId, password: hashedPassword } = assertWithTypeguard(
+		queryResult.rows[0],
+		(value): value is User => {
+			return (
+				value !== null &&
+				typeof value === 'object' &&
+				'user_id' in value &&
+				'password' in value
+			);
+		},
+		'Invalid email or password',
+		ErrorName.authentication,
+	);
+
+	assert(
+		await bcrypt.compare(password, hashedPassword),
+		'Invalid email or password',
+		ErrorName.authentication,
+	);
 
 	const token = await safe({
 		value: jwt.sign({ _id: userId }, env.JWT_SECRET),
@@ -137,7 +158,7 @@ const signinController = controllerBuilder(signInControllerHelper);
 // === Sign out ===
 
 const signoutControllerHelper = async (
-	request: AppRequest,
+	request: AppRequest<EmptyRequest>,
 	response: Response,
 ) => {
 	response.clearCookie('token');
@@ -154,7 +175,7 @@ const signoutController = controllerBuilder(signoutControllerHelper);
 // == Get current user ==
 
 const getCurrentUserControllerHelper = async (
-	request: AppRequest,
+	request: AppRequest<EmptyRequest>,
 	response: Response,
 ) => {
 	const { _id: userId } = assert(
@@ -164,9 +185,9 @@ const getCurrentUserControllerHelper = async (
 	);
 
 	const {
-		rows: [{ username, email }],
+		rows: [{ name, email }],
 	} = await safe<QueryResult<User>>({
-		value: pool.query('SELECT username, email FROM users WHERE user_id = $1', [
+		value: pool.query('SELECT name, email FROM users WHERE user_id = $1', [
 			userId,
 		]),
 		errorMessage: 'Error querying user with provided id',
@@ -176,7 +197,7 @@ const getCurrentUserControllerHelper = async (
 	return {
 		request,
 		response,
-		data: { username, email },
+		data: { name, email },
 	};
 };
 
@@ -203,5 +224,5 @@ export type UserControllerHelper =
 	| typeof signoutControllerHelper
 	| typeof getCurrentUserControllerHelper;
 
-export type UserQueryrResponse =
+export type UserQueryResponse =
 	ControllerHelperResponseData<UserControllerHelper>;

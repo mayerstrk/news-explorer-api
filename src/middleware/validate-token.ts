@@ -7,9 +7,10 @@ import { isRequestUser } from '../utils/helpers/is-request-user';
 // eslint-disable-next-line unicorn/prevent-abbreviations
 import { env } from '../environment-config';
 import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
+import { AppRequestVariant } from '../types/app-requests';
 
-const validateTokenMiddleware = async (
-	request: AppRequest,
+const validateTokenMiddleware = async <T extends AppRequestVariant>(
+	request: AppRequest<T>,
 	_response: Response,
 	next: NextFunction,
 ) => {

@@ -42,7 +42,7 @@ const environmentVariables = {
 	),
 	[EnvironmentVariables.API_DOMAIN]: getEnvVariable(
 		EnvironmentVariables.API_DOMAIN,
-		'127.0.0.1:3000',
+		'127.0.0.1',
 	),
 	[EnvironmentVariables.API_URL]: getEnvVariable(
 		EnvironmentVariables.API_URL,

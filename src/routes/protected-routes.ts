@@ -6,9 +6,11 @@ import {
 	createArticleController,
 	saveArticleController,
 	unsaveArticleController,
+	deleteArticleController,
 } from '../controllers/article-controllers';
 import {
 	createArticleValidator,
+	deleteArticleValidator,
 	saveArticleValidator,
 	unsaveArticleValidator,
 } from '../validators/controller-validators';
@@ -18,15 +20,20 @@ router.get('/users/me', getCurrentUserController);
 
 router.get('/articles', getAllArticlesController);
 router.post('/articles', createArticleValidator, createArticleController);
+router.delete(
+	'/articles/:articleId',
+	deleteArticleValidator,
+	deleteArticleController,
+);
 
-router.get('/users/me/articles', getCurrentUserSavedArticlesController);
+router.get('/saved-articles', getCurrentUserSavedArticlesController);
 router.post(
-	'/users/me/articles/:articleId',
+	'/saved-articles/:articleId',
 	saveArticleValidator,
 	saveArticleController,
 );
 router.delete(
-	'/users/me/articles/:articleId',
+	'/saved-articles/:articleId',
 	unsaveArticleValidator,
 	unsaveArticleController,
 );

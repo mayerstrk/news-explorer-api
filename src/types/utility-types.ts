@@ -6,8 +6,7 @@ import { type ControllerHelper } from '../builders/controller-builder';
  * @type {Type}
  */
 
-type ControllerHelperResponseData<T extends ControllerHelper> = Awaited<
-	ReturnType<T>
->['data'];
+type ControllerHelperResponseData<T extends ControllerHelper<any>> =
+	T extends ControllerHelper<any> ? Awaited<ReturnType<T>>['data'] : never;
 
 export { ControllerHelperResponseData };

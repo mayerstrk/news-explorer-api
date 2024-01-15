@@ -1,9 +1,15 @@
-export interface SignupRequest {
+export interface EmptyRequest {
+	body: never;
+	params: never;
+}
+
+export interface CreateUserRequest {
 	body: {
 		email: string;
 		password: string;
 		name: string;
 	};
+	params: never;
 }
 
 export interface SigninRequest {
@@ -11,6 +17,7 @@ export interface SigninRequest {
 		email: string;
 		password: string;
 	};
+	params: never;
 }
 
 export interface CreateArticleRequest {
@@ -23,22 +30,35 @@ export interface CreateArticleRequest {
 		link: string;
 		image: string;
 	};
+	params: never;
 }
 
 export interface DeleteArticleRequest {
+	body: never;
 	params: {
-		articleId: number;
+		articleId: string;
 	};
 }
 
 export interface SaveArticleRequest {
+	body: never;
 	params: {
-		articleId: number;
+		articleId: string;
 	};
 }
 
 export interface UnsaveArticleRequest {
+	body: never;
 	params: {
-		articleId: number;
+		articleId: string;
 	};
 }
+
+export type AppRequestVariant =
+	| EmptyRequest
+	| CreateUserRequest
+	| SigninRequest
+	| CreateArticleRequest
+	| DeleteArticleRequest
+	| SaveArticleRequest
+	| UnsaveArticleRequest;
