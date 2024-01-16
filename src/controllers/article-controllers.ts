@@ -94,7 +94,7 @@ const deleteArticleControllerHelper = async (
 	);
 
 	assert(
-		getOwnerQueryResult.rows[1]?.owner === userId,
+		getOwnerQueryResult.rows[0]?.owner === userId,
 		'Article has a different owner',
 		ErrorName.forbidden,
 	);
