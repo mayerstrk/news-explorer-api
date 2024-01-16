@@ -13,7 +13,7 @@ import rateLimit from 'express-rate-limit';
 
 const app = express();
 
-// rate limmitter
+// rate limiter
 app.use(rateLimit());
 
 // use helmet
