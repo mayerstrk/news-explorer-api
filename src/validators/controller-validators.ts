@@ -32,15 +32,3 @@ export const deleteArticleValidator = celebrate({
 		articleId: Joi.number().integer().required(),
 	}),
 });
-
-export const saveArticleValidator = celebrate({
-	[Segments.PARAMS]: Joi.object().keys({
-		articleId: Joi.number().integer().required(),
-	}),
-});
-
-export const unsaveArticleValidator = celebrate({
-	[Segments.PARAMS]: Joi.object().keys({
-		articleId: Joi.number().integer().required(),
-	}),
-});

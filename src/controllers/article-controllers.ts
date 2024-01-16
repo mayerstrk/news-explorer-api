@@ -12,8 +12,6 @@ import {
 	CreateArticleRequest,
 	DeleteArticleRequest,
 	EmptyRequest,
-	SaveArticleRequest,
-	UnsaveArticleRequest,
 } from '../types/app-requests';
 
 interface Article {
@@ -150,163 +148,20 @@ const getAllArticlesController = controllerBuilder(
 	getAllArticlesControllerHelper,
 );
 
-// === Get current user articles ===
-
-const getCurrentUserSavedArticlesControllerHelper = async (
-	request: AppRequest<EmptyRequest>,
-	response: Response,
-) => {
-	const { _id: userId } = await safe({
-		value: request.user,
-		errorMessage: 'No user arratched to request',
-		errorName: ErrorName.internalServerError,
-	});
-
-	const { rows: articles } = await safe<QueryResult<Article>>({
-		value: pool.query(
-			`
-			SELECT a.* FROM articles a
-			JOIN user_saved_articles usa ON a.article_id = usa.article_id
-			WHERE usa.user_id = $1
-		`,
-			[userId],
-		),
-		errorMessage: 'Error getting artciles',
-		errorName: ErrorName.internalServerError,
-	});
-
-	return {
-		request,
-		response,
-		data: articles,
-	};
-};
-
-const getCurrentUserSavedArticlesController = controllerBuilder(
-	getCurrentUserSavedArticlesControllerHelper,
-);
-
-// == Save article ==
-
-const saveArticleControllerHelper = async (
-	request: AppRequest<SaveArticleRequest>,
-	response: Response,
-) => {
-	const articleId = assertWithTypeguard(
-		Number.parseInt(request.params.articleId),
-		(v): v is number => Number.isInteger(v),
-		'Failed to parse article id',
-		ErrorName.internalServerError,
-	);
-
-	const { _id: userId } = assert(
-		request.user,
-		'No user property found in request object',
-		ErrorName.internalServerError,
-	);
-
-	await safe({
-		value: pool.query(
-			'INSERT INTO user_saved_articles (user_id, article_id) VALUES ($1, $2)',
-			[userId, articleId],
-		),
-		errorMessage: 'Error saving article',
-		errorName: ErrorName.internalServerError,
-	});
-
-	const {
-		rows: [article],
-	} = await safe<QueryResult<Article>>({
-		value: pool.query(
-			'SELECT * FROM protected.articles WHERE article_id = $1',
-			[articleId],
-		),
-		errorMessage: 'Error retrieving article',
-		errorName: ErrorName.internalServerError,
-	});
-
-	return {
-		request,
-		response,
-		data: article,
-	};
-};
-
-const saveArticleController = controllerBuilder(saveArticleControllerHelper);
-
-// == Unsave article ==
-
-const unsaveArticleControllerHelper = async (
-	request: AppRequest<UnsaveArticleRequest>,
-	response: Response,
-) => {
-	const articleId = assertWithTypeguard(
-		Number.parseInt(request.params.articleId),
-		(v): v is number => Number.isInteger(v),
-		'Failed to parse article id',
-		ErrorName.internalServerError,
-	);
-
-	const { _id: userId } = assert(
-		request.user,
-		'No user property found in request object',
-		ErrorName.internalServerError,
-	);
-
-	await safe({
-		value: pool.query(
-			'DELETE FROM user_saved_articles WHERE user_id = $1 AND article_id = $2',
-			[userId, articleId],
-		),
-		errorMessage: 'Error unsaving article',
-		errorName: ErrorName.internalServerError,
-	});
-
-	const {
-		rows: [article],
-	} = await safe<QueryResult<Article>>({
-		value: pool.query(
-			'SELECT * FROM protected.articles WHERE article_id = $1',
-			[articleId],
-		),
-		errorMessage: 'Error retrieving article',
-		errorName: ErrorName.internalServerError,
-	});
-
-	return {
-		request,
-		response,
-		data: article,
-	};
-};
-
-const unsaveArticleController = controllerBuilder(
-	unsaveArticleControllerHelper,
-);
-
 export {
 	createArticleController,
 	deleteArticleController,
 	getAllArticlesController,
-	getCurrentUserSavedArticlesController,
-	saveArticleController,
-	unsaveArticleController,
 };
 
 export type ArticleController =
 	| typeof createArticleController
 	| typeof deleteArticleController
-	| typeof getCurrentUserSavedArticlesController
-	| typeof saveArticleController
-	| typeof unsaveArticleController
 	| typeof getAllArticlesController;
 
 export type ArticleControllerHelper =
 	| typeof createArticleControllerHelper
 	| typeof deleteArticleControllerHelper
-	| typeof getCurrentUserSavedArticlesControllerHelper
-	| typeof saveArticleControllerHelper
-	| typeof unsaveArticleControllerHelper
 	| typeof getAllArticlesControllerHelper;
 
 export type ArticleQueryResponse =

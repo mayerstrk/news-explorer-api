@@ -40,25 +40,9 @@ export interface DeleteArticleRequest {
 	};
 }
 
-export interface SaveArticleRequest {
-	body: never;
-	params: {
-		articleId: string;
-	};
-}
-
-export interface UnsaveArticleRequest {
-	body: never;
-	params: {
-		articleId: string;
-	};
-}
-
 export type AppRequestVariant =
 	| EmptyRequest
 	| CreateUserRequest
 	| SigninRequest
 	| CreateArticleRequest
-	| DeleteArticleRequest
-	| SaveArticleRequest
-	| UnsaveArticleRequest;
+	| DeleteArticleRequest;
