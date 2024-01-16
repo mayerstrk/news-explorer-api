@@ -14,7 +14,7 @@ const app = express();
 // Configure express server and set up middleware.
 app.use(
 	cors({
-		origin: [environment.APP_URL],
+		origin: [environment.APP_DOMAIN],
 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 		credentials: true,
 		optionsSuccessStatus: 204,
