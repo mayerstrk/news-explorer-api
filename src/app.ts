@@ -36,6 +36,10 @@ app.use('/', validateTokenMiddleware);
 
 app.use('/', protectedRoutes);
 
+app.use('/', (_request, response, _next) => {
+	response.status(404).send({ message: 'Not found' });
+});
+
 app.use('/', errorLogger);
 
 app.use('/', celebrateValidator());
