@@ -8,8 +8,12 @@ import { errors as celebrateValidator } from 'celebrate';
 import { requestLogger, errorLogger } from './middleware/logger-middleware';
 import publicRoutes from './routes/public-routes';
 import protectedRoutes from './routes/protected-routes';
+import helmet from 'helmet';
 
 const app = express();
+
+// use helmet
+app.use(helmet());
 
 // Configure express server and set up middleware.
 app.use(
