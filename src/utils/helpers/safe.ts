@@ -2,12 +2,12 @@ import { CastError, ValidationError } from '../classes/error-classes';
 import { type ErrorName } from '../enums/error-names';
 import getErrorConstructor from './get-error-constructor';
 
-type NeitherOption = {
+interface NeitherOption {
 	test?: never;
 	typeguard?: never;
 	testErrorMessage?: never;
 	testErrorName?: never;
-};
+}
 
 type SafeConfig<V, R extends V = V> = {
 	value: V | Promise<V>;
@@ -105,8 +105,12 @@ async function safe<V, R extends V>(configuration: SafeConfig<V, R>) {
 		resolvedValue = await value;
 	} catch (error) {
 		if (errorHandler) {
-			const { errorName, errorMessage } = errorHandler(error);
-			throw new (getErrorConstructor(errorName))(errorMessage, error as Error);
+			const { errorName: _errorName, errorMessage: _errorMessage } =
+				errorHandler(error);
+			throw new (getErrorConstructor(_errorName))(
+				_errorMessage,
+				error as Error,
+			);
 		}
 		throw new (getErrorConstructor(errorName))(errorMessage, error as Error);
 	}
@@ -129,8 +133,8 @@ async function safe<V, R extends V>(configuration: SafeConfig<V, R>) {
 		}) for value: ${JSON.stringify(resolvedValue)}`;
 
 		if (testErrorName) {
-			const SelectedError = getErrorConstructor(testErrorName);
-			throw new SelectedError(_errorMessage);
+			const selectedError = getErrorConstructor(testErrorName);
+			throw new selectedError(_errorMessage);
 		}
 
 		throw new ValidationError(_errorMessage);

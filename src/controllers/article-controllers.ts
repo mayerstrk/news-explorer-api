@@ -1,6 +1,6 @@
 import controllerBuilder from '../builders/controller-builder';
 import { ErrorName } from '../utils/enums/error-names';
-import pool from '../db';
+import pool from '../database';
 import safe from '../utils/helpers/safe';
 import { type QueryResult } from 'pg';
 import { AppRequest } from '../types/request';
@@ -72,7 +72,7 @@ const deleteArticleControllerHelper = async (
 	response: Response,
 ) => {
 	const articleId = assertWithTypeguard(
-		parseInt(request.params.articleId),
+		Number.parseInt(request.params.articleId),
 		(v): v is number => Number.isInteger(v),
 		'Failed to parse article id',
 		ErrorName.internalServerError,
@@ -193,7 +193,7 @@ const saveArticleControllerHelper = async (
 	response: Response,
 ) => {
 	const articleId = assertWithTypeguard(
-		parseInt(request.params.articleId),
+		Number.parseInt(request.params.articleId),
 		(v): v is number => Number.isInteger(v),
 		'Failed to parse article id',
 		ErrorName.internalServerError,
@@ -241,7 +241,7 @@ const unsaveArticleControllerHelper = async (
 	response: Response,
 ) => {
 	const articleId = assertWithTypeguard(
-		parseInt(request.params.articleId),
+		Number.parseInt(request.params.articleId),
 		(v): v is number => Number.isInteger(v),
 		'Failed to parse article id',
 		ErrorName.internalServerError,

@@ -15,6 +15,7 @@ const errorHandlerMiddleware = (
 	response: Response,
 	_next: NextFunction,
 ) => {
+	// eslint-disable-next-line no-restricted-syntax
 	console.error(error.stack);
 	// Check if the error is an instance of CustomError
 	if (error instanceof CustomError) {

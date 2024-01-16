@@ -2,10 +2,13 @@ extends:
   - 'plugin:@typescript-eslint/recommended'
   - 'plugin:unicorn/recommended'
   - 'plugin:@typescript-eslint/stylistic'
-  - 'xo'
+  - 'airbnb-typescript/base'
   - 'plugin:prettier/recommended'
 parser: '@typescript-eslint/parser'
+parserOptions:
+  project: './tsconfig.json'
 plugins:
+  - 'import'
   - '@typescript-eslint'
   - 'unicorn'
 root: true
@@ -20,7 +23,14 @@ rules:
   object-curly-spacing:
     - 'error'
     - 'always'
-  '@typescript-eslint/naming-convention': 'off'
+  '@typescript-eslint/naming-convention':
+    - 'error'
+    - {
+        selector: 'variableLike',
+        format: ['camelCase'],
+        leadingUnderscore: 'allow',
+      }
+  '@typescript-eslint/no-explicit-any': 'off'
   '@typescript-eslint/object-curly-spacing':
     - 'error'
     - 'always'
@@ -31,3 +41,9 @@ rules:
   '@typescript-eslint/no-unused-vars':
     - 'error'
     - argsIgnorePattern: '_'
+  'no-restricted-syntax':
+    - 'error'
+    - selector: 'CallExpression[callee.object.name="console"][callee.property.name=/^log|warn|error|info|trace$/]'
+      message: 'Unexpected console statement.'
+    - selector: 'Identifier[name="eslint-disable"], Identifier[name="eslint-disable-line"], Identifier[name="eslint-disable-next-line"]'
+      message: 'Unexpected eslint disable directive.'

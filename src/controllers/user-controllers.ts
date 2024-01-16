@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import pool from '../db';
+import pool from '../database';
 import safe from '../utils/helpers/safe';
 import { type ControllerHelperResponseData } from '../types/utility-types';
 import { ErrorName } from '../utils/enums/error-names';
-import { env } from '../environment-config';
+import { env as environment } from '../environment-config';
 import { QueryResult, type DatabaseError } from 'pg';
 import controllerBuilder from '../builders/controller-builder';
 import { AppRequest } from '../types/request';
@@ -64,7 +64,7 @@ const createUserControllerHelper = async (
 	});
 
 	const token = await safe({
-		value: jwt.sign({ _id: userId }, env.JWT_SECRET, {
+		value: jwt.sign({ _id: userId }, environment.JWT_SECRET, {
 			expiresIn: '7d',
 		}),
 		errorMessage: 'Error signing token',
@@ -74,7 +74,7 @@ const createUserControllerHelper = async (
 	response.cookie('token', token, {
 		httpOnly: true,
 		secure: true,
-		domain: env.API_DOMAIN,
+		domain: environment.API_DOMAIN,
 		sameSite: 'strict',
 		signed: true,
 	});
@@ -133,7 +133,7 @@ const signInControllerHelper = async (
 	);
 
 	const token = await safe({
-		value: jwt.sign({ _id: userId }, env.JWT_SECRET),
+		value: jwt.sign({ _id: userId }, environment.JWT_SECRET),
 		errorMessage: 'Error signing token',
 		errorName: ErrorName.internalServerError,
 	});
@@ -141,7 +141,7 @@ const signInControllerHelper = async (
 	response.cookie('token', token, {
 		httpOnly: true,
 		secure: true,
-		domain: env.API_DOMAIN,
+		domain: environment.API_DOMAIN,
 		sameSite: 'strict',
 		signed: true,
 	});

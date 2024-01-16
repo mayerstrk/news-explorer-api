@@ -1,5 +1,5 @@
 import express from 'express';
-import { env } from './environment-config';
+import { env as environment } from './environment-config';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import validateTokenMiddleware from './middleware/validate-token';
@@ -14,7 +14,7 @@ const app = express();
 // Configure express server and set up middleware.
 app.use(
 	cors({
-		origin: [env.APP_URL],
+		origin: [environment.APP_URL],
 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 		credentials: true,
 		optionsSuccessStatus: 204,
@@ -24,7 +24,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', true);
-app.use(cookieParser(env.COOKIE_SECRET));
+app.use(cookieParser(environment.COOKIE_SECRET));
 
 // request logger
 app.use('/', requestLogger);
@@ -43,10 +43,12 @@ app.use('/', celebrateValidator());
 app.use('/', errorHandlerMiddleware);
 
 const serverListeningMessage =
-	env.NODE_ENV === 'production'
-		? `http server is running on internal port ${env.PORT} behind a reverse proxy
-		Public URL:${env.DATABASE_URL}`
-		: `http server running on port ${env.PORT}. URL: http://${env.APP_DOMAIN}:${env.PORT}`;
+	environment.NODE_ENV === 'production'
+		? `http server is running on internal port ${environment.PORT}
+			behind a reverse proxy Public URL:${environment.DATABASE_URL}`
+		: `http server running on port ${environment.PORT}.
+			URL: http://${environment.APP_DOMAIN}:${environment.PORT}`;
 
 // start lsitening
-app.listen(env.PORT, () => console.log(serverListeningMessage));
+// eslint-disable-next-line no-restricted-syntax
+app.listen(environment.PORT, () => console.log(serverListeningMessage));

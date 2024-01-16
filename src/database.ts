@@ -1,8 +1,8 @@
 import { Pool } from 'pg';
-import { env } from './environment-config';
+import { env as environment } from './environment-config';
 
 const pool = new Pool({
-	connectionString: env.DATABASE_URL,
+	connectionString: environment.DATABASE_URL,
 	ssl: {
 		rejectUnauthorized: false,
 	},

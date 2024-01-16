@@ -3,7 +3,9 @@ import { ErrorName } from '../enums/error-names';
 
 abstract class CustomError extends Error {
 	status: Status;
+
 	name: ErrorName;
+
 	cause?: Error;
 
 	constructor(message: string, status: Status, name: ErrorName, cause?: Error) {

@@ -47,8 +47,7 @@ function getErrorConstructor(errorName: ErrorName): AppCustomErrorConstructor {
 			return ConflictError;
 		}
 
-		case ErrorName.badRequest: {
-		}
+		case ErrorName.badRequest:
 
 		case ErrorName.internalServerError: {
 			return InternalServerError;
