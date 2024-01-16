@@ -9,8 +9,12 @@ import { requestLogger, errorLogger } from './middleware/logger-middleware';
 import publicRoutes from './routes/public-routes';
 import protectedRoutes from './routes/protected-routes';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
+
+// rate limmitter
+app.use(rateLimit());
 
 // use helmet
 app.use(helmet());
