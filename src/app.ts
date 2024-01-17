@@ -2,15 +2,12 @@ import express from 'express';
 import { env as environment } from './environment-config';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import validateTokenMiddleware from './middleware/validate-token';
 import errorHandlerMiddleware from './middleware/error-handler-middleware';
 import { errors as celebrateValidator } from 'celebrate';
 import { requestLogger, errorLogger } from './middleware/logger-middleware';
-import publicRoutes from './routes/public-routes';
-import protectedRoutes from './routes/protected-routes';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { NotFoundError } from './utils/classes/error-classes';
+import routes from './routes/index';
 
 const app = express();
 
@@ -39,16 +36,9 @@ app.use(cookieParser(environment.COOKIE_SECRET));
 app.use('/', requestLogger);
 
 // routes
-app.use('/', publicRoutes);
+routes(app);
 
-app.use('/', validateTokenMiddleware);
-
-app.use('/', protectedRoutes);
-
-app.use('/', (_request, _response, next) => {
-	next(new NotFoundError('Not found'));
-});
-
+// error middleware
 app.use('/', errorLogger);
 
 app.use('/', celebrateValidator());
