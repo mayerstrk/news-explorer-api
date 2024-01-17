@@ -5,7 +5,6 @@ import safe from '../utils/helpers/safe';
 import { type ControllerHelperResponseData } from '../types/utility-types';
 import { ErrorName } from '../utils/enums/error-names';
 import { env as environment } from '../environment-config';
-import { QueryResult, type DatabaseError } from 'pg';
 import controllerBuilder from '../builders/controller-builder';
 import { AppRequest } from '../types/request';
 import { type Response } from 'express';
@@ -15,7 +14,6 @@ import type {
 	EmptyRequest,
 	SigninRequest,
 } from '../types/app-requests';
-import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
 
 export interface User {
 	user_id: number;
@@ -25,6 +23,9 @@ export interface User {
 	created_at: Date;
 	updated_at: Date;
 }
+import { type DatabaseError } from 'pg';
+import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
+import hasRowsInResult from '../utils/typeguards/has-rows-in-result';
 
 // === Create User ===
 
@@ -95,11 +96,16 @@ const signInControllerHelper = async (
 
 	const {
 		rows: [{ user_id: userId, password: hashedPassword }],
-	} = await safe(
-		pool.query<Pick<User, 'user_id' | 'password'>>(
-			'SELECT user_id, password FROM protected.users WHERE email = $1',
-			[email],
+	} = assertWithTypeguard(
+		await safe(
+			pool.query<Pick<User, 'user_id' | 'password'>>(
+				'SELECT user_id, password FROM protected.users WHERE email = $1',
+				[email],
+			),
+			'Error querying user',
+			ErrorName.internalServerError,
 		),
+		hasRowsInResult,
 		'Invalid email or password',
 		ErrorName.authentication,
 	);
@@ -162,18 +168,23 @@ const getCurrentUserControllerHelper = async (
 ) => {
 	const { _id: userId } = assert(
 		request.user,
-		'No user field foun in request object',
+		'No user field found in request object',
 		ErrorName.internalServerError,
 	);
 
 	const {
 		rows: [{ name, email }],
-	} = await safe(
-		pool.query<Pick<User, 'name' | 'email'>>(
-			'SELECT name, email FROM users WHERE user_id = $1',
-			[userId],
+	} = assertWithTypeguard(
+		await safe(
+			pool.query<Pick<User, 'name' | 'email'>>(
+				'SELECT name, email FROM users WHERE user_id = $1',
+				[userId],
+			),
+			'Error querying user',
+			ErrorName.internalServerError,
 		),
-		'Error querying user with provided id',
+		hasRowsInResult,
+		"Could not found user with the current user's id",
 		ErrorName.internalServerError,
 	);
 
