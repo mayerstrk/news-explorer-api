@@ -2,7 +2,7 @@ import { type Response, type NextFunction } from 'express';
 import { type AppRequest } from '../types/request';
 import jwt from 'jsonwebtoken';
 import { ErrorName } from '../utils/enums/error-names';
-import { isRequestUser } from '../utils/helpers/is-request-user';
+import { isRequestUser } from '../utils/typeguards/is-request-user';
 import { env } from '../environment-config';
 import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
 import { AppRequestVariant } from '../types/app-requests';
