@@ -1,6 +1,6 @@
 const enum ErrorName {
 	validation = 'ValidationError',
-	notFound = 'DocumentNotFoundError',
+	notFound = 'NotFoundError',
 	cast = 'CastError',
 	duplicateKey = 'DuplicateKeyError',
 	authentication = 'AuthenticationError',

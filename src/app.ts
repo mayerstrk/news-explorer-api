@@ -10,6 +10,7 @@ import publicRoutes from './routes/public-routes';
 import protectedRoutes from './routes/protected-routes';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { NotFoundError } from './utils/classes/error-classes';
 
 const app = express();
 
@@ -44,8 +45,8 @@ app.use('/', validateTokenMiddleware);
 
 app.use('/', protectedRoutes);
 
-app.use('/', (_request, response, _next) => {
-	response.status(404).send({ message: 'Not found' });
+app.use('/', (_request, _response, next) => {
+	next(new NotFoundError('Not found'));
 });
 
 app.use('/', errorLogger);
@@ -62,5 +63,4 @@ const serverListeningMessage =
 			URL: http://${environment.APP_DOMAIN}:${environment.PORT}`;
 
 // start lsitening
-// eslint-disable-next-line no-restricted-syntax
 app.listen(environment.PORT, () => console.log(serverListeningMessage));

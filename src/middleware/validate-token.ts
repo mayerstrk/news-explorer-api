@@ -2,12 +2,11 @@ import { type Response, type NextFunction } from 'express';
 import { type AppRequest } from '../types/request';
 import jwt from 'jsonwebtoken';
 import { ErrorName } from '../utils/enums/error-names';
-import safe from '../utils/helpers/safe';
 import { isRequestUser } from '../utils/helpers/is-request-user';
-// eslint-disable-next-line unicorn/prevent-abbreviations
 import { env } from '../environment-config';
 import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
 import { AppRequestVariant } from '../types/app-requests';
+import assert from '../utils/helpers/assert';
 
 const validateTokenMiddleware = async <T extends AppRequestVariant>(
 	request: AppRequest<T>,
@@ -15,11 +14,11 @@ const validateTokenMiddleware = async <T extends AppRequestVariant>(
 	next: NextFunction,
 ) => {
 	try {
-		const token = await safe({
-			value: request.signedCookies?.token as string | undefined,
-			errorMessage: 'No token provided',
-			errorName: ErrorName.authentication,
-		});
+		const token = await assert(
+			request.signedCookies?.token,
+			'No token provided',
+			ErrorName.authentication,
+		);
 
 		const decoded = assertWithTypeguard(
 			jwt.verify(token, env.JWT_SECRET),

@@ -18,7 +18,6 @@ const enum EnvironmentVariables {
 function getEnvironmentVariable(name: EnvironmentVariables, defaultValue: any) {
 	const value = process.env[name];
 	if (value === undefined) {
-		// eslint-disable-next-line no-restricted-syntax
 		console.warn(
 			`Environment variable ${name} is not set. Using default: ${defaultValue}`,
 		);

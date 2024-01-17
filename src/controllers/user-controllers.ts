@@ -16,7 +16,8 @@ import type {
 	SigninRequest,
 } from '../types/app-requests';
 import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
-interface User {
+
+export interface User {
 	user_id: number;
 	email: string;
 	name: string;
@@ -35,41 +36,35 @@ const createUserControllerHelper = async (
 		body: { name, email, password },
 	} = request;
 
-	const hashedPassword = await safe({
-		value: bcrypt.hash(password, 10),
-		errorMessage: 'Error hashing password',
-		errorName: ErrorName.internalServerError,
-	});
+	const hashedPassword = await safe(
+		bcrypt.hash(password, 10),
+		'Error hashing password',
+		ErrorName.internalServerError,
+	);
 
 	const {
 		rows: [{ user_id: userId }],
-	} = await safe<QueryResult<User>>({
-		value: pool.query(
+	} = await safe(
+		pool.query<Pick<User, 'user_id'>>(
 			'INSERT INTO protected.users (name, email, password) VALUES ($1, $2, $3) RETURNING user_id',
 			[name, email, hashedPassword],
 		),
-		errorHandler: (error) => {
+		(error) => {
 			if ((error as DatabaseError).code === '23505') {
-				return {
-					errorName: ErrorName.conflict,
-					errorMessage: 'Email already in use',
-				};
+				return ['Email already in use', ErrorName.conflict];
 			}
 
-			return {
-				errorName: ErrorName.internalServerError,
-				errorMessage: 'Error creating user',
-			};
+			return ['Error creating user', ErrorName.internalServerError];
 		},
-	});
+	);
 
-	const token = await safe({
-		value: jwt.sign({ _id: userId }, environment.JWT_SECRET, {
+	const token = assert(
+		jwt.sign({ _id: userId }, environment.JWT_SECRET, {
 			expiresIn: '7d',
 		}),
-		errorMessage: 'Error signing token',
-		errorName: ErrorName.internalServerError,
-	});
+		'Error signing token',
+		ErrorName.internalServerError,
+	);
 
 	response.cookie('token', token, {
 		httpOnly: true,
@@ -98,30 +93,13 @@ const signInControllerHelper = async (
 		body: { email, password },
 	} = request;
 
-	// const { rows } = await safe<QueryResult<User>>({
-	// 	value: pool.query(
-	// 		'SELECT user_id, password FROM protected.users WHERE email = ($1)',
-	// 		[email],
-	// 	),
-	// 	errorMessage: 'Invalid email or password',
-	// 	errorName: ErrorName.authentication,
-	// });
-
-	const queryResult: QueryResult<User> = await pool.query(
-		'SELECT user_id, password FROM protected.users WHERE email = $1',
-		[email],
-	);
-
-	const { user_id: userId, password: hashedPassword } = assertWithTypeguard(
-		queryResult.rows[0],
-		(value): value is User => {
-			return (
-				value !== null &&
-				typeof value === 'object' &&
-				'user_id' in value &&
-				'password' in value
-			);
-		},
+	const {
+		rows: [{ user_id: userId, password: hashedPassword }],
+	} = await safe(
+		pool.query<Pick<User, 'user_id' | 'password'>>(
+			'SELECT user_id, password FROM protected.users WHERE email = $1',
+			[email],
+		),
 		'Invalid email or password',
 		ErrorName.authentication,
 	);
@@ -132,11 +110,11 @@ const signInControllerHelper = async (
 		ErrorName.authentication,
 	);
 
-	const token = await safe({
-		value: jwt.sign({ _id: userId }, environment.JWT_SECRET),
-		errorMessage: 'Error signing token',
-		errorName: ErrorName.internalServerError,
-	});
+	const token = assert(
+		jwt.sign({ _id: userId }, environment.JWT_SECRET),
+		'Error signing token',
+		ErrorName.internalServerError,
+	);
 
 	response.cookie('token', token, {
 		httpOnly: true,
@@ -161,7 +139,11 @@ const signoutControllerHelper = async (
 	request: AppRequest<EmptyRequest>,
 	response: Response,
 ) => {
-	response.clearCookie('token');
+	assert(
+		response.clearCookie('token'),
+		'Error signing out',
+		ErrorName.internalServerError,
+	);
 
 	return {
 		request,
@@ -186,13 +168,14 @@ const getCurrentUserControllerHelper = async (
 
 	const {
 		rows: [{ name, email }],
-	} = await safe<QueryResult<User>>({
-		value: pool.query('SELECT name, email FROM users WHERE user_id = $1', [
-			userId,
-		]),
-		errorMessage: 'Error querying user with provided id',
-		errorName: ErrorName.internalServerError,
-	});
+	} = await safe(
+		pool.query<Pick<User, 'name' | 'email'>>(
+			'SELECT name, email FROM users WHERE user_id = $1',
+			[userId],
+		),
+		'Error querying user with provided id',
+		ErrorName.internalServerError,
+	);
 
 	return {
 		request,

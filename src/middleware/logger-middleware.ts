@@ -6,7 +6,6 @@ import expressWinston from 'express-winston';
 export const requestLogger = expressWinston.logger({
 	transports: [
 		new winston.transports.File({
-			// eslint-disable-next-line unicorn/prefer-module
 			filename: path.join(__dirname, '../../logs/request.log'),
 		}),
 	],
@@ -21,7 +20,6 @@ export const requestLogger = expressWinston.logger({
 export const errorLogger = expressWinston.errorLogger({
 	transports: [
 		new winston.transports.File({
-			// eslint-disable-next-line unicorn/prefer-module
 			filename: path.join(__dirname, '../../logs/error.log'),
 		}),
 	],

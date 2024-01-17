@@ -2,7 +2,6 @@ import controllerBuilder from '../builders/controller-builder';
 import { ErrorName } from '../utils/enums/error-names';
 import pool from '../database';
 import safe from '../utils/helpers/safe';
-import { type QueryResult } from 'pg';
 import { AppRequest } from '../types/request';
 import assert from '../utils/helpers/assert';
 import assertWithTypeguard from '../utils/helpers/assert-with-typeguard';
@@ -43,14 +42,14 @@ const createArticleControllerHelper = async (
 
 	const {
 		rows: [article],
-	} = await safe<QueryResult<Article>>({
-		value: pool.query(
+	} = await safe(
+		pool.query<Article>(
 			'INSERT INTO protected.articles (keyword, title, text, date, source, link, image, owner) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
 			[keyword, title, text, date, source, link, image, userId],
 		),
-		errorMessage: 'Error creating article',
-		errorName: ErrorName.internalServerError,
-	});
+		'Error creating article',
+		ErrorName.internalServerError,
+	);
 
 	return {
 		request,
@@ -82,37 +81,36 @@ const deleteArticleControllerHelper = async (
 		ErrorName.internalServerError,
 	);
 
-	const getOwnerQueryResult: QueryResult<Article> = await pool.query(
-		'SELECT owner FROM protected.articles WHERE article_id = $1',
-		[articleId],
+	const {
+		rows: [{ owner }],
+		rowCount,
+	} = await safe(
+		pool.query<Pick<Article, 'owner'>>(
+			'SELECT owner FROM protected.articles WHERE article_id = $1',
+			[articleId],
+		),
+		'Error executing get owner query',
+		ErrorName.internalServerError,
 	);
 
-	assert(
-		getOwnerQueryResult.rowCount === 1,
-		'Article not found',
-		ErrorName.notFound,
-	);
+	assert(rowCount, 'Article not found', ErrorName.internalServerError);
 
 	assert(
-		getOwnerQueryResult.rows[0]?.owner === userId,
+		owner === userId,
 		'Article has a different owner',
 		ErrorName.forbidden,
 	);
 
-	const deleteQueryResult: QueryResult<Article> = await pool.query(
-		'DELETE FROM protected.articles WHERE article_id = $1 AND owner = $2 RETURNING *',
-		[articleId, userId],
-	);
-
-	assert(
-		deleteQueryResult.rowCount === 1,
-		'Article not found',
-		ErrorName.notFound,
-	);
-
 	const {
 		rows: [article],
-	} = deleteQueryResult;
+	} = await safe(
+		pool.query<Article>(
+			'DELETE FROM protected.articles WHERE article_id = $1 AND owner = $2 RETURNING *',
+			[articleId, userId],
+		),
+		'Error deleting article',
+		ErrorName.internalServerError,
+	);
 
 	return {
 		request,
@@ -125,22 +123,30 @@ const deleteArticleController = controllerBuilder(
 	deleteArticleControllerHelper,
 );
 
-// === Get all articles ===
+// === Get owned articles ===
 
 const getAllArticlesControllerHelper = async (
 	request: AppRequest<EmptyRequest>,
 	response: Response,
 ) => {
-	const { rows: articles } = await safe<QueryResult<Article>>({
-		value: pool.query('SELECT * FROM protected.articles'),
-		errorMessage: 'Error getting articles',
-		errorName: ErrorName.internalServerError,
-	});
+	const { _id: userId } = assert(
+		request.user,
+		'No user property found in request object',
+		ErrorName.internalServerError,
+	);
+
+	const { rows: articles } = await safe(
+		pool.query<Article>('SELECT * FROM protected.articles WHERE owner = $1', [
+			userId,
+		]),
+		'Error executing get articles query',
+		ErrorName.internalServerError,
+	);
 
 	return {
 		request,
 		response,
-		data: articles,
+		data: getArticlesQueryResult.rows,
 	};
 };
 

@@ -14,6 +14,8 @@ plugins:
 root: true
 rules:
   import/extensions: 'off'
+  unicorn/prefer-module: 'off'
+  unicorn/prevent-abbreviations: 'off'
   max-len:
     - 'error'
     - code: 80
@@ -41,9 +43,3 @@ rules:
   '@typescript-eslint/no-unused-vars':
     - 'error'
     - argsIgnorePattern: '_'
-  'no-restricted-syntax':
-    - 'error'
-    - selector: 'CallExpression[callee.object.name="console"][callee.property.name=/^log|warn|error|info|trace$/]'
-      message: 'Unexpected console statement.'
-    - selector: 'Identifier[name="eslint-disable"], Identifier[name="eslint-disable-line"], Identifier[name="eslint-disable-next-line"]'
-      message: 'Unexpected eslint disable directive.'

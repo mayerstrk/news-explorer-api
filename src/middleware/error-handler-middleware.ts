@@ -6,7 +6,6 @@ import {
 } from '../utils/classes/error-classes';
 import { ErrorName } from '../utils/enums/error-names';
 import { type NextFunction } from 'express-serve-static-core';
-// eslint-disable-next-line unicorn/prevent-abbreviations
 import { env } from '../environment-config';
 
 const errorHandlerMiddleware = (
@@ -15,7 +14,6 @@ const errorHandlerMiddleware = (
 	response: Response,
 	_next: NextFunction,
 ) => {
-	// eslint-disable-next-line no-restricted-syntax
 	console.error(error.stack);
 	// Check if the error is an instance of CustomError
 	if (error instanceof CustomError) {
