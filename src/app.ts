@@ -17,7 +17,7 @@ app.use(rateLimit());
 // use helmet
 app.use(helmet());
 
-// Configure express server and set up middleware.
+// Configure express server and set up middleware
 app.use(
 	cors({
 		origin: [environment.APP_DOMAIN],
