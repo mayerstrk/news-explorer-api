@@ -13,6 +13,10 @@ const validateTokenMiddleware = async <T extends AppRequestVariant>(
 	_response: Response,
 	next: NextFunction,
 ) => {
+	console.log('============================');
+	console.log('origin', request.originalUrl);
+	console.log('cookies:', request.cookies);
+	console.log('signedCookies:', request.signedCookies);
 	try {
 		const token = await assert(
 			request.signedCookies?.token,
@@ -20,12 +24,17 @@ const validateTokenMiddleware = async <T extends AppRequestVariant>(
 			ErrorName.authentication,
 		);
 
+		console.log('IN VALIDATE TOKEN:', token);
+
 		const decoded = assertWithTypeguard(
 			jwt.verify(token, env.JWT_SECRET),
 			isRequestUser,
 			'Invalid token format.',
 			ErrorName.authentication,
 		);
+
+		console.log('decoded', decoded);
+		console.log('=============================');
 
 		request.user = decoded;
 		next();

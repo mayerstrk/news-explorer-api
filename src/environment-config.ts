@@ -53,7 +53,8 @@ const environmentVariables = {
 	),
 	[EnvironmentVariables.DATABASE_URL]: getEnvironmentVariable(
 		EnvironmentVariables.DATABASE_URL,
-		'not set',
+		'postgres://ylzlwejtwxgsba:ac5f574ea9ac8d2d47075f99fe1c65d2476d90937c083a916a4baceb26221280@ec2-3-213-187-157.compute-1.amazonaws.com:5432/d3h8456ojqpsqt',
+		// 'not set',
 	),
 	[EnvironmentVariables.COOKIE_SECRET]: getEnvironmentVariable(
 		EnvironmentVariables.COOKIE_SECRET,

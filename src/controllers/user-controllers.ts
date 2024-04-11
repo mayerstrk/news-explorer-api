@@ -95,11 +95,11 @@ const signInControllerHelper = async (
 	} = request;
 
 	const {
-		rows: [{ user_id: userId, password: hashedPassword }],
+		rows: [{ user_id: userId, password: hashedPassword, name }],
 	} = assertWithTypeguard(
 		await safe(
-			pool.query<Pick<User, 'user_id' | 'password'>>(
-				'SELECT user_id, password FROM protected.users WHERE email = $1',
+			pool.query<Pick<User, 'user_id' | 'password' | 'name'>>(
+				'SELECT user_id, password, name FROM protected.users WHERE email = $1',
 				[email],
 			),
 			'Error querying user',
@@ -122,6 +122,8 @@ const signInControllerHelper = async (
 		ErrorName.internalServerError,
 	);
 
+	console.log('IN SIGN IN', token);
+
 	response.cookie('token', token, {
 		httpOnly: true,
 		secure: true,
@@ -130,10 +132,14 @@ const signInControllerHelper = async (
 		signed: true,
 	});
 
+	console.log('IN SIGN IN', JSON.stringify(response.get('Cookie')));
+
+	console.log(name);
+
 	return {
 		request,
 		response,
-		data: { message: 'User signed in successfully' },
+		data: { message: 'User signed in successfully', username: name },
 	};
 };
 

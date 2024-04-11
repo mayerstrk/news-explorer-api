@@ -12,7 +12,7 @@ import routes from './routes/index';
 const app = express();
 
 // rate limiter
-app.use(rateLimit());
+// app.use(rateLimit());
 
 // use helmet
 app.use(helmet());

@@ -23,6 +23,7 @@ const errorHandlerMiddleware = (
 			.send({
 				message: error.message,
 				name: error.name,
+				status: error.status,
 				cause: { message: error.cause?.message, error: error.cause },
 			});
 	}
