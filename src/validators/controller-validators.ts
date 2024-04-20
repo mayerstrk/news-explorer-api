@@ -17,13 +17,13 @@ export const signInValidator = celebrate({
 
 export const createArticleValidator = celebrate({
 	[Segments.BODY]: Joi.object().keys({
-		keyword: Joi.string().required(),
+		keyword: Joi.string(),
 		title: Joi.string().required(),
 		text: Joi.string().required(),
 		date: Joi.date().iso().required(),
 		source: Joi.string().required(),
 		link: Joi.string().required(),
-		image: Joi.string().required(),
+		image: Joi.string().allow(''),
 	}),
 });
 
